@@ -1,0 +1,49 @@
+name: DevSecOps CI Pipeline
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  # Job 1: Static Application Security Testing (SAST)
+  sast_scan:
+    name: Run Bandit (SAST)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          
+      - name: Install Bandit Security Linter
+        run: pip install bandit
+        
+      - name: Run Bandit Scan against Python code
+        run: bandit -r ioc_analyzer.py -ll -ii
+
+  # Job 2: Container Security Scanning
+  container_scan:
+    name: Build & Scan Container (Trivy)
+    needs: sast_scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Build Docker Image
+        run: docker build -t ioc-analyzer:latest .
+
+      - name: Run Trivy Vulnerability Scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: 'ioc-analyzer:latest'
+          format: 'table'
+          exit-code: '0'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
