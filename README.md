@@ -10,21 +10,32 @@ This tool shifts manual log review into an automated pipeline, allowing infrastr
 * **API Integration:** Automating REST API queries to the AbuseIPDB endpoint and handling nested JSON responses.
 * **Defensive Engineering:** Implementing rate-limiting considerations, error handling for network timeouts, and bypassing private/internal IP subnets to optimize API quotas.
 * **Data Structuring:** Converting raw JSON threat intelligence into structured, human-readable formats (Terminal tables / CSV) for incident response reporting.
+* **Containerization:** Architecting a lightweight `Dockerfile` to package the script and its dependencies, ensuring platform-agnostic deployment.
+* **DevSecOps (CI/CD):** Engineering an automated GitHub Actions pipeline that performs Static Application Security Testing (SAST) via **Bandit** and container vulnerability scanning via **Trivy** on every codebase push.
 
 ## Installation & Usage
 
-**Prerequisites:** Python 3.x, `requests` library, and a valid AbuseIPDB API key.
+### Option A: Run via Docker (Recommended)
+By utilizing the containerized version, all dependencies are isolated from the host OS.
+```bash
+# Build the Docker image locally
+docker build -t ioc-analyzer .
 
+# Execute the container, mounting your local logs to the container's working directory
+docker run --rm -v $(pwd):/app ioc-analyzer -f auth.log -o threat_report.csv
+```
+
+### Option B: Local Execution
+**Prerequisites:** Python 3.x, `requests`, and a valid AbuseIPDB API key.
 ```bash
 # Clone the repository
 git clone [https://github.com/Zeskr/Automated-IoC-Analyzer.git](https://github.com/Zeskr/Automated-IoC-Analyzer.git)
 cd Automated-IoC-Analyzer
 
-# Execute the script against a target log file
+# Execute the script
 python3 ioc_analyzer.py -f auth.log -o threat_report.csv
 ```
 
----
 
 ## Technical Execution & Workflow
 
